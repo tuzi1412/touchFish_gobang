@@ -1,2 +1,2 @@
-# touchFish_gobang_gobang
+# touchFish_gobang
 局域网五子棋
