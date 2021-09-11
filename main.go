@@ -90,8 +90,14 @@ LOOP:
 					}
 				}
 			}
+			config.Map = data
 			for {
-				fmt.Println("Your move:")
+				if config.YourChess == 1 {
+					fmt.Print(`Your chess is "-", `)
+				} else if config.YourChess == 2 {
+					fmt.Print(`Your chess is "+", `)
+				}
+				fmt.Println("Your move(example: 12-C):")
 				fmt.Scanln(&config.Move)
 				result, err := utils.ParseMove(config.Move)
 				if err != nil {
@@ -100,8 +106,11 @@ LOOP:
 				}
 				err = api.SendData(result)
 				if err != nil {
-
+					fmt.Println(err)
+					continue
 				}
+				utils.PrintMap(config.Map)
+				break
 			}
 		}
 	}
