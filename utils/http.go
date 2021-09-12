@@ -25,11 +25,11 @@ func SendURL(method, url string, body io.Reader, header map[string]string) (io.R
 		return nil, err
 	}
 	req.Header = http.Header{}
-	if header != nil {
-		for k, v := range header {
-			req.Header.Set(k, v)
-		}
+
+	for k, v := range header {
+		req.Header.Set(k, v)
 	}
+
 	res, err := client.Do(req)
 	if err != nil {
 		return nil, err
