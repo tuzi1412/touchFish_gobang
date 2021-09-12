@@ -3,9 +3,7 @@ package api
 import (
 	"encoding/json"
 	"fmt"
-	"math/rand"
 	"net/http"
-	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/tuzi1412/touchFish_gobang/config"
@@ -36,7 +34,7 @@ func (s *Server) routerInit() {
 	base := s.router.PathPrefix("/touchFish_gobang").Subrouter()
 	base.HandleFunc("/", s.processMap).Methods(http.MethodPut)
 	base.HandleFunc("/testConnect", s.testConnect).Methods(http.MethodGet)
-	base.HandleFunc("/firstHand", s.firstHand).Methods(http.MethodPut)
+	base.HandleFunc("/chooseChess", s.chooseChess).Methods(http.MethodPut)
 }
 
 func (s *Server) processMap(w http.ResponseWriter, r *http.Request) {
@@ -50,25 +48,24 @@ func (s *Server) processMap(w http.ResponseWriter, r *http.Request) {
 	s.rspMap(w, msg.Data)
 }
 
-func (s *Server) firstHand(w http.ResponseWriter, r *http.Request) {
+func (s *Server) chooseChess(w http.ResponseWriter, r *http.Request) {
 	var msg config.HTTPRsp
 	err := json.NewDecoder(r.Body).Decode(&msg)
 	if err != nil {
 		s.rspError(w, "data error", err)
 		return
 	}
-	rand.Seed(time.Now().UnixNano())
-	myRandomNum := rand.Int()
-
+	fmt.Println("chooseChess:", config.RandomNum)
+	fmt.Println("chooseChess-msg.Code:", msg.Code)
 	if config.MyChess == 0 {
-		if myRandomNum >= msg.Code {
+		if config.RandomNum > msg.Code {
 			config.MyChess = 1
 		} else {
 			config.MyChess = 2
 		}
 	}
 	var rsp config.HTTPRsp
-	rsp.Code = myRandomNum
+	rsp.Code = config.RandomNum
 	rsp.Message = "success"
 	rspbyte, _ := json.Marshal(rsp)
 	w.Header().Add("Content-Type", "application/json")

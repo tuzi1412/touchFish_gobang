@@ -44,12 +44,17 @@ func ipInit() error {
 	return nil
 }
 
+func init() {
+	rand.Seed(time.Now().UnixNano())
+	config.RandomNum = rand.Int()
+	fmt.Println("init:", config.RandomNum)
+}
+
 func waitConnect() {
 	for {
 		fmt.Println("connecting...")
 		res, err := utils.SendURL("GET", "http://"+api.OppositeIP+":8080/touchFish_gobang/testConnect", nil, utils.GenHeader())
 		if err != nil {
-			time.Sleep(3 * time.Second)
 			continue
 		}
 		var resBody []byte
@@ -57,14 +62,12 @@ func waitConnect() {
 			defer res.Close()
 			resBody, err = ioutil.ReadAll(res)
 			if err != nil {
-				time.Sleep(3 * time.Second)
 				continue
 			}
 		}
 		var rsp config.HTTPRsp
 		json.Unmarshal(resBody, &rsp)
 		if rsp.Code != 0 {
-			time.Sleep(3 * time.Second)
 			continue
 		}
 		fmt.Println("connect success!")
@@ -89,7 +92,11 @@ LOOP:
 						return
 					} else if strings.ToLower(config.NewGame) == "y" {
 						config.Map = [15][15]uint8{}
-						config.MyChess = 0
+						if config.MyChess == 1 {
+							config.MyChess = 2
+						} else {
+							config.MyChess = 1
+						}
 						select {
 						case <-config.MapChan:
 							//do nothing, clean channel
@@ -133,7 +140,11 @@ LOOP:
 							return
 						} else if strings.ToLower(config.NewGame) == "y" {
 							config.Map = [15][15]uint8{}
-							config.MyChess = 0
+							if config.MyChess == 1 {
+								config.MyChess = 2
+							} else {
+								config.MyChess = 1
+							}
 							select {
 							case <-config.MapChan:
 								//do nothing, clean channel
@@ -147,6 +158,7 @@ LOOP:
 						}
 					}
 				}
+				fmt.Println("waiting for  your opponent's move")
 				break
 			}
 		}
@@ -154,38 +166,40 @@ LOOP:
 }
 
 func firstHand() error {
-	var msg config.HTTPRsp
-	rand.Seed(time.Now().UnixNano())
-	myRandomNum := rand.Int()
+	if config.MyChess == 0 {
+		var msg config.HTTPRsp
+		msg.Code = config.RandomNum
+		msg.Message = "success"
 
-	msg.Code = myRandomNum
-	msg.Message = "success"
+		byteData, _ := json.Marshal(msg)
+		body := bytes.NewReader(byteData)
 
-	byteData, _ := json.Marshal(msg)
-	body := bytes.NewReader(byteData)
-
-	res, err := utils.SendURL("PUT", "http://"+api.OppositeIP+":8080/touchFish_gobang/firstHand", body, utils.GenHeader())
-	if err != nil {
-		return err
-	}
-
-	var resBody []byte
-	if res != nil {
-		defer res.Close()
-		resBody, err = ioutil.ReadAll(res)
+		res, err := utils.SendURL("PUT", "http://"+api.OppositeIP+":8080/touchFish_gobang/chooseChess", body, utils.GenHeader())
 		if err != nil {
 			return err
 		}
-	}
-	var rsp config.HTTPRsp
-	json.Unmarshal(resBody, &rsp)
-	if config.MyChess == 0 {
-		if myRandomNum >= msg.Code {
-			config.MyChess = 1
-		} else {
-			config.MyChess = 1
+
+		var resBody []byte
+		if res != nil {
+			defer res.Close()
+			resBody, err = ioutil.ReadAll(res)
+			if err != nil {
+				return err
+			}
+		}
+		var rsp config.HTTPRsp
+		json.Unmarshal(resBody, &rsp)
+		fmt.Println("firstHand:", config.RandomNum)
+		fmt.Println("firstHand-rsp.Code:", rsp.Code)
+		if config.MyChess == 0 {
+			if config.RandomNum > rsp.Code {
+				config.MyChess = 1
+			} else {
+				config.MyChess = 2
+			}
 		}
 	}
+
 	if config.MyChess == 1 {
 		utils.PrintMap(config.Map)
 		for {

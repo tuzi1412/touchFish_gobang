@@ -9,6 +9,7 @@ var Map [15][15]uint8
 var Move string
 var NewGame string
 var MyChess uint8 //1 is - , 2 is + ; - is first hand
+var RandomNum int
 var MapChan chan [15][15]uint8 = make(chan [15][15]uint8)
 
 // HTTPRsp is the type of http common response payload
