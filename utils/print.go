@@ -116,6 +116,7 @@ func ParseMove(move string) ([15][15]uint8, error) {
 		fmt.Println("Input error! example: 12-C")
 		return config.Map, fmt.Errorf("input error")
 	}
+	move = strings.ToUpper(move)
 	sp := strings.Split(move, "-")
 	num, _ := strconv.Atoi(sp[0])
 	cha := sp[1][0]

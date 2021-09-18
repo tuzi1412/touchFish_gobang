@@ -20,7 +20,7 @@ func SendData(data [15][15]uint8) error {
 	byteData, _ := json.Marshal(msg)
 	body := bytes.NewReader(byteData)
 
-	res, err := utils.SendURL("PUT", "http://"+OppositeIP+":8080/touchFish_gobang/", body, utils.GenHeader())
+	res, err := utils.SendURL("PUT", "http://"+OppositeIP+":22333/touchFish_gobang/", body, utils.GenHeader())
 	if err != nil {
 		return err
 	}

@@ -17,7 +17,7 @@ type Server struct {
 func NewServer() *Server {
 	return &Server{
 		router: mux.NewRouter(),
-		port:   "8080",
+		port:   "22333",
 	}
 }
 
@@ -55,8 +55,6 @@ func (s *Server) chooseChess(w http.ResponseWriter, r *http.Request) {
 		s.rspError(w, "data error", err)
 		return
 	}
-	fmt.Println("chooseChess:", config.RandomNum)
-	fmt.Println("chooseChess-msg.Code:", msg.Code)
 	if config.MyChess == 0 {
 		if config.RandomNum > msg.Code {
 			config.MyChess = 1

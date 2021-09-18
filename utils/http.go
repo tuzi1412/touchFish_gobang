@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"io"
 	"net"
 	"net/http"
@@ -33,6 +34,9 @@ func SendURL(method, url string, body io.Reader, header map[string]string) (io.R
 	res, err := client.Do(req)
 	if err != nil {
 		return nil, err
+	}
+	if res.StatusCode != 200 {
+		return nil, fmt.Errorf("response is not 200")
 	}
 	return res.Body, nil
 }
